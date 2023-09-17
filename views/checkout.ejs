@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        #checkout-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        #cart-items {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            padding: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .cart-item:hover {
+            opacity: 0.8;
+        }
+
+        .remove-item {
+            background-color: #ff3333;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .remove-item:hover {
+            background-color: #ff0000;
+        }
+
+        #checkout-button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        #checkout-button:hover {
+            background-color: #0056b3;
+        }
+
+        img {
+            max-width: 50px;
+            max-height: 50px;
+            margin-right: 10px;
+        }
+
+        #total {
+            text-align: right;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Checkout</h1>
+    <div id="checkout-container">
+        <div id="cart-items">
+            <!-- Cart items will be displayed here -->
+        </div>
+        <div id="total">
+            <!-- Total price will be displayed here -->
+        </div>
+        <div id="cart-count-checkout"></div> 
+        <button id="checkout-button">Proceed to Checkout</button>
+    </div>
+
+    <script>
+        // Function to display cart items
+        function displayCartItems() {
+            // Fetch cart items from localStorage
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+            // Get the cart items container
+            const cartItemsElement = document.getElementById('cart-items');
+            const totalElement = document.getElementById('total');
+
+            // Clear the existing content
+            cartItemsElement.innerHTML = '';
+            totalElement.textContent = '';
+
+            let totalPrice = 0;
+
+            // Display each item in the cart
+            cartItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('cart-item');
+                itemElement.innerHTML = `
+                    <div>
+                        <img src="${item.image}" alt="${item.title}">
+                        <span>${item.title} - $${item.price.toFixed(2)}</span>
+                    </div>
+                    <button class="remove-item" data-id="${item.id}">Remove</button>
+                `;
+                cartItemsElement.appendChild(itemElement);
+
+                totalPrice += item.price;
+            });
+
+            // Display the total price
+            totalElement.textContent = `Total: $${totalPrice.toFixed(2)}`;
+
+            // Add event listeners to remove items from the cart
+            const removeButtons = document.querySelectorAll('.remove-item');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemId = button.getAttribute('data-id');
+                    // Find the index of the item with the matching ID
+                    const itemIndex = cartItems.findIndex(item => item.id === itemId);
+                    if (itemIndex !== -1) {
+                        // Remove the item at the found index
+                        cartItems.splice(itemIndex, 1);
+                        // Update the cartItems in localStorage
+                        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                        // Redisplay cart items and total price
+                        displayCartItems();
+                        // Update the cart count
+                        const newCartCount = cartItems.length;
+                        localStorage.setItem('cartCount', newCartCount);
+                    }
+                });
+            });
+        }
+
+        // Load cart items from localStorage
+        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+        // Display cart items when the page loads
+        displayCartItems();
+
+        // JavaScript for handling the checkout process
+        const checkoutButton = document.getElementById('checkout-button');
+        checkoutButton.addEventListener('click', () => {
+            // Implement your checkout logic here, e.g., send the cartItems to a server for processing.
+            // After successful checkout, you can clear the cart by:
+            localStorage.removeItem('cartItems');
+            // Optionally, update the cart count display on the main page.
+            localStorage.setItem('cartCount', '0');
+            // Redirect to a thank you page or display a confirmation message.
+            alert('Thank you for your purchase!');
+            // You can redirect the user to a thank you page if needed.
+            // window.location.href = 'thankyou.html';
+        });
+    </script>
+</body>
+</html>
